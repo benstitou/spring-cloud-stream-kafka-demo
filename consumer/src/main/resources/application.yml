@@ -1,0 +1,40 @@
+server:
+  port: 9097
+
+app:
+  messaging.kafka.broker: 127.0.0.1
+
+spring:
+  application.name: consumer
+  cloud:
+    stream:
+      defaultBinder: kafka
+      default.contentType: application/json
+      bindings:
+        messageConsumer-in-0:
+          destination: messages
+          group: messageGroup
+          consumer:
+              maxAttempts: 5
+              backOffInitialInterval: 1000
+              backOffMaxInterval: 2000
+              backOffMultiplier: 3.0
+      kafka.binder:
+        brokers: ${app.messaging.kafka.broker}
+        defaultBrokerPort: 9092
+        consumer.enableDlq: true
+
+---
+spring:
+  profiles: docker
+
+server.port: 8080
+
+app:
+  messaging.kafka.broker: kafka
+
+---
+spring:
+  profiles: kafka
+  cloud.stream.defaultBinder: kafka
+  kafka.bootstrap-servers: kafka:9092
